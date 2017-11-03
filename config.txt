@@ -1,0 +1,3 @@
+#Connection to MySQL
+driver_mysql=com.mysql.jdbc.Driver
+url_mysql=jdbc:mysql://localhost/instagram?user=root&password=
