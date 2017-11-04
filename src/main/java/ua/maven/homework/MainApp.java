@@ -19,13 +19,20 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.awt.Color;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Properties;
+
+import javax.swing.ImageIcon;
 
 import org.apache.log4j.chainsaw.Main;
 import org.slf4j.Logger;
@@ -43,6 +50,7 @@ public class MainApp extends Application {
     private static final Logger log = LoggerFactory.getLogger(MainApp.class);
     
     public static void registrationScene()	{
+    	
     	GridPane grid = new GridPane();
     	grid.setVgap(5);
     	grid.setHgap(5);
@@ -107,7 +115,11 @@ public class MainApp extends Application {
     	});
     	
     	try {
-			Image image = new Image(new FileInputStream("D:\\eclipse_ee_workspace\\FXhomework\\src\\main\\resources\\images\\java.png"));
+			// QUESTION !!!!
+    		//File faylik = new File(MainApp.class.getResource("/images/java.png").toString());
+    		File file = new File(MainApp.class.getResource("/images/java.png").getFile());
+    		
+    		Image image = new Image(new FileInputStream(file));
 			ImageView imageView = new ImageView(image);
 			FadeTransition fadeOut = new FadeTransition(Duration.millis(2000), imageView);
 			fadeOut.setToValue(1.0);
@@ -167,8 +179,20 @@ public class MainApp extends Application {
 		} catch (IOException e) {
 			System.err.println("Property file does not exist");
 		}
+		
+		try	{
+    	String path = MainApp.class.getResource("/media/my.mp3").toString();
+    	Media media = new Media(path);
+    	MediaPlayer mediaplayer = new MediaPlayer(media);
+    	mediaplayer.play();
+		} catch (Exception e)	{
+			log.error("File \"my.mp3\" was not found");
+		}
+    	
 		db = DBManager.newInstance();
+		
         launch(args);
+
     }
 
 }
