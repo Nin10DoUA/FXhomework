@@ -1,28 +1,39 @@
 package ua.maven.homework;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.apache.log4j.chainsaw.Main;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MainApp extends Application {
 	
+	private Alert alert;
 	private static Stage primaryStage;
 	private static Scene scene;
 	private static Scene scene2;
@@ -34,7 +45,7 @@ public class MainApp extends Application {
     public static void registrationScene()	{
     	GridPane grid = new GridPane();
     	grid.setVgap(5);
-    	grid.setHgap(15);
+    	grid.setHgap(5);
     	grid.setPadding(new Insets(20,20,20,20));
     	
     	Label usernameLabel = new Label("Login: ");   	
@@ -54,9 +65,22 @@ public class MainApp extends Application {
     	Button registerButton = new Button();
     	registerButton.setText("Register");
     	registerButton.setMaxSize(150, 150);
-    	registerButton.setAlignment(Pos.CENTER);
+    	registerButton.setAlignment(Pos.CENTER_RIGHT);
     	registerButton.setOnMouseClicked((e)->{
-        	primaryStage.setScene(scene);
+    		HelloController con = new HelloController();
+        	if (userField.getText().length() > 0 && passwordField.getText().length() > 0 && emailField.getText().length() > 5 )	{
+        		if (emailField.getText().contains("@") && emailField.getText().contains("."))	{
+        			if (MainApp.db.uniqueCheck(userField.getText(), emailField.getText()))	{
+        				MainApp.db.newUserCreation(userField.getText(), passwordField.getText(), emailField.getText());
+        					if (MainApp.db.isSuccess())	{
+        						con.showAlert("Info", "Registration successful!", AlertType.INFORMATION);
+        						log.info("new user created");
+        					}
+        			}
+        		}
+        	} else {
+        		con.showAlert("Error", "Wrong Inputs", AlertType.ERROR);
+        	}
     	});
     	grid.add(registerButton, 2, 0, 3, 3);
     	
@@ -74,6 +98,28 @@ public class MainApp extends Application {
     	emailTip.setText("Please enter your email.\n" +
     	"Should contain \"@\" and \".\" char\n");
     	emailField.setTooltip(emailTip);
+    	
+    	Button buttonCancel = new Button("Cancel");
+    	buttonCancel.setAlignment(Pos.TOP_CENTER);
+    	grid.add(buttonCancel, 1, 4);
+    	buttonCancel.setOnMouseClicked((e)->{
+    		primaryStage.setScene(scene);
+    	});
+    	
+    	try {
+			Image image = new Image(new FileInputStream("D:\\eclipse_ee_workspace\\FXhomework\\src\\main\\resources\\images\\java.png"));
+			ImageView imageView = new ImageView(image);
+			FadeTransition fadeOut = new FadeTransition(Duration.millis(2000), imageView);
+			fadeOut.setToValue(1.0);
+			fadeOut.setFromValue(0.0);
+			fadeOut.setAutoReverse(true);
+			fadeOut.setCycleCount(Timeline.INDEFINITE);
+			fadeOut.play();
+			grid.add(imageView, 4, 4);
+		} catch (FileNotFoundException e1) {
+			log.warn("java.png in /images is not found");
+			e1.printStackTrace();
+		}
     	
     	scene2 = new Scene(grid, 400, 220);
     	scene2.getStylesheets().add("/styles/styles.css");
@@ -98,12 +144,13 @@ public class MainApp extends Application {
         log.debug("Showing JFX scene");
         scene = new Scene(rootNode, 400, 220);
         scene.getStylesheets().add("/styles/styles.css");
-        
+       
         primaryStage.setTitle("JavaFx Homework 1.0");
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.show();
     }
+	
     
     public static void main(String[] args) throws Exception {
 		FileInputStream fis;

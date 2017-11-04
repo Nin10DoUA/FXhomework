@@ -16,6 +16,11 @@ public class DBManager {
 	private PreparedStatement pst = null;
 	private byte authenticated;
 	private byte unique;
+	private boolean success;
+
+	public boolean isSuccess() {
+		return this.success;
+	}
 
 	private DBManager(String driver, String url) {
 		this.driver = driver;
@@ -120,4 +125,29 @@ public class DBManager {
 			return false;
 		}
 	}
+	
+	public void newUserCreation(String user, String pass, String e) {
+		success = false;
+		final String queryNewUser = "INSERT INTO accounts (username, password,email) values ('" + user + "','" + pass
+				+ "','" + e + "')";
+		try {
+			pst = conn.prepareStatement(queryNewUser);
+			System.out.println("Obtained statement");
+			try {
+				pst.execute();
+				System.out.println("One row has been added!");
+				conn.commit();
+				success = true;
+			} catch (SQLException ex) {
+				System.out.println("Query Insert Error");
+				ex.printStackTrace();
+			} finally {
+				pst.close();
+			}
+		} catch (SQLException ex) {
+			System.out.println("Statement error");
+		}
+
+	}
+	
 }

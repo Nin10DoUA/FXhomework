@@ -10,7 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HelloController	{
-
+	
+	private Alert alert;
     private static final Logger log = LoggerFactory.getLogger(HelloController.class);
     @FXML private TextField loginField;
     @FXML private PasswordField passwordField;
@@ -21,20 +22,37 @@ public class HelloController	{
     	log.info("Trying to log in ...");
         String login = loginField.getText();
         String password = passwordField.getText();
-        Alert alert = new Alert(AlertType.INFORMATION);        
-        DialogPane dialogPane = alert.getDialogPane();
-        dialogPane.getStylesheets().add(getClass().getResource("/styles/styles.css").toExternalForm());
-        dialogPane.getStyleClass().add("myDialog"); 
-        alert.setTitle("Info");
-        alert.setHeaderText(null);
-        alert.setContentText("Successfully logged in ...");
-        alert.show();
+        if(login.length() > 0 && password.length() > 0)	{
+        	if(MainApp.db.authCheck(login, password))	{
+        		showAlert("Info", "Successfull login!", AlertType.INFORMATION);
+        		log.info("Log in success!");
+        	} else {
+        		showAlert("Warning","login and password do not match", AlertType.WARNING);
+        		log.warn("wrong login or password");
+        	}
+        } else {
+        	showAlert("Error","Please enter your credentials", AlertType.ERROR);
+        	log.error("please specify all fields");
+        }
+        
+        
     }
     
     public void registerUser()	{
     	log.info("Proceeding to register user page");
     	MainApp.registrationScene();
     	
+    }
+    
+    public void showAlert (String title, String content, Alert.AlertType alertType)	{
+        alert = new Alert(alertType);        
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.getStylesheets().add(getClass().getResource("/styles/styles.css").toExternalForm());
+        dialogPane.getStyleClass().add("myDialog"); 
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.show();
     }
 
 }
